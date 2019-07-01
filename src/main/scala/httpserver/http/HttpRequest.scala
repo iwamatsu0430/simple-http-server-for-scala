@@ -1,16 +1,18 @@
 package jp.iwmat.httpserver.http
 
 import scala.util._
+import jp.iwmat.httpserver.syntax._
 
-case class HttpRequest(inputs: List[String]) {
+case class HttpRequest(inputs: List[String]) extends OptionImplicit {
 
-  private[http] val statusLines: Try[String] = {
+  private[http] val statusLine: Try[StatusLine] = {
     val unit = Success(())
     for {
-      _           <- if (inputs.nonEmpty) unit else Failure(HttpRequest.errors.EmptyRequest())
-      statusLines <- inputs.headOption.map(_.split(" ")).toRight(new Exception("")).toTry
-      _           <- if (statusLines.length == 3) unit else Failure(new Exception(""))
-    } yield ""
+      statusLines <- inputs.headOption.map(_.split(" ")).toTry(HttpRequest.errors.EmptyRequest)
+      _           <- if (statusLines.length == 3) unit else Failure(HttpRequest.errors.InvalidProtocol)
+      method      <- Method.valueOf(statusLines(0)).toTry(HttpRequest.errors.InvalidProtocol)
+      version     <- Version.valueOf(statusLines(2)).toTry(HttpRequest.errors.InvalidProtocol)
+    } yield StatusLine(method, statusLines(1), version)
   }
 
   def isValid: Boolean = {
@@ -20,6 +22,7 @@ case class HttpRequest(inputs: List[String]) {
 
 object HttpRequest {
   object errors {
-    case class EmptyRequest() extends Exception("client request is empty")
+    case object EmptyRequest extends Exception("client request is empty")
+    case object InvalidProtocol extends Exception("invalid protocol")
   }
 }

@@ -5,33 +5,26 @@ import org.scalatest._
 import org.mockito.MockitoSugar
 
 class HttpRequestSpec extends WordSpec with MustMatchers with MockitoSugar {
-  "statusLines" when {
+  "statusLine" when {
     "inputs is Nil" must {
       "return Failure" in {
-        HttpRequest(Nil).statusLines.isFailure mustBe true
+        HttpRequest(Nil).statusLine.isFailure mustBe true
       }
     }
 
     "inputs is not Nil" when {
-      "head line is 'GET'" must {
+      "head line is 'INVALID FORMAT DESU YO'" must {
         "return Failure" in {
-          val statusLine = "GET"
-          HttpRequest(List(statusLine)).statusLines.isFailure mustBe true
-        }
-      }
-
-      "head line is 'GET /'" must {
-        "return Failure" in {
-          // val statusLine = "GET /"
-          // HttpRequest(List(statusLine)).statusLines.isFailure mustBe true
+          val statusLine = "INVALID FORMAT DESU YO"
+          HttpRequest(List(statusLine)).statusLine.isFailure mustBe true
         }
       }
 
       "head line is 'GET / HTTP/1.1'" must {
-        // "return Failure" in {
-        //   val statusLine = "GET /"
-        //   HttpRequest(List(statusLine)).statusLines.isFailure mustBe true
-        // }
+        "return Success(StatusLine(GET, /, HTTP/1.1))" in {
+          val statusLine = "GET / HTTP/1.1"
+          HttpRequest(List(statusLine)).statusLine mustBe Success(StatusLine(Method.Get, "/", Version.HTTP_11))
+        }
       }
     }
   }
