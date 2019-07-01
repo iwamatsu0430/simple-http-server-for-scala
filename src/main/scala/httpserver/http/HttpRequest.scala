@@ -15,9 +15,7 @@ case class HttpRequest(inputs: List[String]) extends OptionImplicit {
     } yield StatusLine(method, statusLines(1), version)
   }
 
-  def isValid: Boolean = {
-    ???
-  }
+  def isValid: Boolean = statusLine.isSuccess
 }
 
 object HttpRequest {

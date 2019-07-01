@@ -28,4 +28,18 @@ class HttpRequestSpec extends WordSpec with MustMatchers with MockitoSugar {
       }
     }
   }
+
+  "isValid" when {
+    "statusLine = Success" must {
+      "return true" in {
+        HttpRequest(List("GET / HTTP/1.1")).isValid mustBe true
+      }
+    }
+
+    "statusLine = Failure" must {
+      "return false" in {
+        HttpRequest(List("INVALID")).isValid mustBe false
+      }
+    }
+  }
 }
